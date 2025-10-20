@@ -1,0 +1,317 @@
+{
+  "name": "Bank WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1u0Wai0EEhwMoS_SXRgZJuXqsoYrfu1zf",
+          "mode": "list",
+          "cachedResultName": "Bank_ilovepdf_merged.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1u0Wai0EEhwMoS_SXRgZJuXqsoYrfu1zf/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -992,
+        -336
+      ],
+      "id": "421a6bd4-a661-4a8f-b2cf-206c3319d748",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "BwlMMDqCUKQ5foXp",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -672,
+        -336
+      ],
+      "id": "ed3ea67d-d573-47a6-abb7-1950d652e7d5",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "LmX1HMoN0e4zPOGa",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        -96
+      ],
+      "id": "9656392f-f286-43cb-96d4-3b02f404db8d",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        -128
+      ],
+      "id": "799958e7-ff9b-4c9b-b9fb-737a422f4251",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YWoCHXwv7lp0woIe",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1328,
+        -784
+      ],
+      "id": "07dfe861-9437-4231-9398-a39de9297aed",
+      "name": "WhatsApp Trigger",
+      "webhookId": "f52498c3-1ab3-41ae-bc28-db0840233e10",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "6rt0bjIBQleqdWdl",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.messages[0].text.body }}\n",
+        "options": {
+          "systemMessage": "You are a helpful and knowledgeable **Bank Customer Help AI Agent** for FutureTrust Bank Pakistan.  \nYour job is to answer customer questions accurately using the **bank policies, FAQs, and guidelines stored in the Supabase database**.  \n\n✅ Always follow these rules:\n1. Only answer using information retrieved from the Supabase vector store.  \n2. If the user’s question is not found in the retrieved context, politely say:\n   “I’m sorry, I couldn’t find that information in our bank records. Would you like me to connect you with a customer officer?”\n3. Keep all answers **clear, short, and friendly** — like WhatsApp messages.  \n4. Use a professional but polite tone suitable for customer service.  \n5. Reply in the **same language** the user used (English or Roman Urdu).  \n6. Do not hallucinate, guess, or make up data — only use verified content.  \n7. For sensitive queries (like account details, complaints, or loan approval), remind users:\n   “For your safety, please don’t share personal account information here.”  \n\n✅ Example behavior:\n- If user asks about “loan interest rate,” retrieve from policy context and reply:\n  “FutureTrust Bank offers personal loans at 15% annual markup for salaried individuals (Roman Urdu: FutureTrust Bank me personal loan 15% markup per saal ke liye milta hai).”\n\n- If user asks something outside dataset:\n  “Sorry, mujhe is baare me record nahi mila. Kya aap chahte hain me aapko customer support se connect kar doon?”\n\nYour mission is to make banking information easy, safe, and instant for every customer of FutureTrust Bank Pakistan.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1120,
+        -784
+      ],
+      "id": "d72eec72-0f85-4950-b871-32ca5627e5d4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1168,
+        -560
+      ],
+      "id": "905cebe0-5ecf-4a96-89ca-069d1d057b21",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YWoCHXwv7lp0woIe",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "798767953325075",
+        "recipientPhoneNumber": "923071460524",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -784,
+        -784
+      ],
+      "id": "2b04c7c7-c9d7-4ec2-8da9-029a97aa26ee",
+      "name": "Send message",
+      "webhookId": "02660b94-e36a-4904-a56b-7dcf048e2cc5",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "LMGZvfrFoc7I7WF9",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Reyrieve answers the query from chat input",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -832,
+        -560
+      ],
+      "id": "5e8b2256-6092-46a1-8444-91e2e18c89cd",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "LmX1HMoN0e4zPOGa",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        -336
+      ],
+      "id": "0719f6a4-deb2-44a4-a418-4fc867893c1a",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bb95e960-df82-4cbb-a6fd-645fe04e2c2e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ee375b2960369f1bc3f21b88d25a42d47ce9f500946f579fde023a392d37f433"
+  },
+  "id": "bMC2HtESRP8qrazb",
+  "tags": []
+}
